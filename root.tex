@@ -1,0 +1,78 @@
+\documentclass[10 pt, conference]{ieeeconf}
+
+\pdfminorversion=4
+
+\usepackage{mathrsfs}
+\usepackage{amssymb}
+\usepackage{cite}
+
+
+\usepackage{mathrsfs}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage[bb=boondox]{mathalfa}	% allows for double-struck 1
+
+\newcommand{\proofbox}{\hfill\mbox{$\blacksquare$}}
+\def\qed{ \rule{.1in}{.1in}}
+\def\eq#1{\begin{equation}#1\end{equation}}
+\def\eqa#1{\begin{eqnarray}#1\end{eqnarray}}
+\def\eqan#1{\begin{eqnarray*}#1\end{eqnarray*}}
+\newcommand{\ga}{\alpha}
+\newcommand{\sk}{\vspace{1ex}}
+\newcommand{\rank}{{\rm rank\;}}
+\newcommand{\lcm}{{\rm lcm}}
+\newcommand{\argmin}{{\rm argmin\;}}
+\newcommand{\image}{{\rm image\ } }
+\newtheorem{thm}{Theorem}%[section]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main Body%%%%%%%%%%%%%%%%%%
+
+
+
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
+
+
+\title{\LARGE \bf Adaptive Cyclic Pursuit for robust decentralized circular formations with non-holonomic agents
+}
+
+
+\author{ Enrique Babio %\quad  Shaoshuai Mou
+	\thanks{
+		%S. Mou is with the School of Aeronautics and Astronautics, Purdue University, West Lafayette, IN 47906. {\small \tt{mous@purdue.edu}}; 
+		E. Babio is currently pursuing a MSc in Aeronautics and Astronautics in Purdue University. {\small \tt{ebabiofe@purdue.edu}}.}
+}
+
+
+\begin{document}
+
+
+
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\begin{abstract}
+	An adaptive control law for achieving circular formations is proposed for non-holonomic agents (steered particles). The control law relies on the Cyclic Pursuit algorithm where every agent $i$ pursues agent $\mod(i+1,n)$ with some offset bearing. If the pursuing pattern follows a ring directed graph and some global conditions on the bearing offsets are met  a circular formation can be achieved .Typically, this bearing offsets have been assigned a priori to meet this circle convergence condition. This work proposes an adaptive variation of the control law that achieves convergence with no knowledge a priori knowledge of the bearing offsets and relying only on local measurements. As such, the algorithm is robust to changes in the network and only implies that the agents are connected forming a ring directed graph. Following this new approach control laws for the control of the radius and for achieving spacing are proposed that work under the new adaptive control. Partial proofs for convergence are provided.
+\end{abstract}
+
+\input{Textfiles/Introduction}
+\input{Textfiles/Formulation}
+\input{Textfiles/Results}
+\input{Textfiles/Simulations}
+\input{Textfiles/Conclusion}
+
+\begin{appendix}[Proof of convergence]
+	\input{Textfiles/Proof}
+\end{appendix}
+
+\bibliographystyle{unsrt}
+\bibliography{biblio}
+\end{document}
