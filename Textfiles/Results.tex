@@ -1,0 +1,132 @@
+\section{Main Results}
+
+This section introduces the approach used to solve the two issues we have identified: radius stability and network robustness. This is done by defining a $\alpha_i$ not as a reference, but as an state that is modified to control the shape of the formation by some adaptive control laws. While the goal of Cyclic Pursuit is to achieve a formation, these control laws modify the shape of the formation.
+
+In order to prevent the adaptive shape control laws from interfering with Cyclic Pursuit and therefore not achieving any formation at all, the only assumption is introduced
+
+\textbf{Assumption 1}. The effect of the adaptive shape control law is negligible outside the formation manifold. They are designed accounting for the dynamics of the formation in the manifold and only there they are guaranteed to converge.
+
+The adaptive shape control law is composed by adding three terms. Each of these terms are independent and have different goals. The goals are circularizing the formation, achieving uniform spacing, and converging to a predefined radius. Each one of them will output a specific adaption rate that for each agent $i$ that we will denote with $\dot{\alpha}_{ci}, \dot{\alpha}_{si}, \dot{\alpha}_{ri}$ respectively. Each of them is modulated with a gain which will be similar to all agents. Therefore the final adaption rate can be computed as
+\begin{equation}
+\label{adaptiveLaw}
+  \dot{\alpha}_i = \mu_c \dot{\alpha}_{ci} + \mu_s \dot{\alpha}_{si} + \mu_r \dot{\alpha}_{ri}
+\end{equation}
+
+We will now describe how to handle the assumption we have introduced from a practical point of view and the expression for the terms of the adaptive control shape control law.
+
+\subsection{Implications of Assumption 1}
+The stated assumption has two implications on the practical implementation of the algorithm.
+
+\begin{enumerate}
+	\item A switching strategy that enables/disables the adaptive shape control law should be available so that while the network is converging to some formation the control adaptive shape control laws are disabled. This switch should be designed taking into account only information that was previously available for each agent so it doesn't affect the distributed nature of the control (i.e measurements of previous agent only).
+	
+	\item A more restrictive switching strategy, less tolerant about errors, will be more robust against undesired changes in $\alpha_i$, but will take more time to converge. Furthermore, using only locally available information means formation errors happening in other parts of network may be unnoticed. Conversely, a more tolerant strategy should be coupled with smaller adaption rate to ensure that the transients due to adaption do not affect the convergence of the adaptive control laws themselves. 
+\end{enumerate}
+
+A possible switch is proposed here, and will be used in the simulations. However for the purpose of proving the validity of the control laws it is assumed to satisfy Assumption 1.
+
+Ideally the value of the switch should be 0 if a formation has not been achieved and 1 if the formation is achieved. If we choose a smooth switch and we define it in terms of some formation error, then it should be 1 at 0 error and 0 as the error grows. A possible candidate for this function is a gaussian-like function with a maximum at 1. A possible measure of error is the relative bearing error. The resulting detector $\nu_{i}$ would be
+\begin{gather}
+\label{switch}
+\nu_{i} = \exp(-\epsilon \sin^2(\kappa_{ij} -\alpha_i))
+\end{gather}
+
+Where $\epsilon$ would be some positive value that defines the tolerance of the switch. The smaller it is the more tolerant the switch.
+
+\subsection{Circularization of the formation}
+As stated before, not every relative bearing $\alpha$ will result in a stable circular motion, however it is guaranteed that all formations will converge to a spiral. A spiraling formation can be easily detected by measuring the rate of change of the distance $\dot{\rho}_{ij}$ between the agent $i$ and the preceding $j$.
+
+We know that any $\alpha$ such that $\alpha^T \mathbb{1} = \pi$ will result in a circular formation. Also if $\alpha^T \mathbb{1} > \pi$ the formation will spiral outwards and vice versa. So an intuitive control law would be to decrease $\alpha_i$ if the inter-agent increases in order to decrease the global $\alpha^T \mathbb{1}$. In order to achieve convergence the change in $\alpha_i$ should at least follow the dynamics of a first-order integrator, so the expression we should use is
+\begin{equation}
+\label{circle}
+  \dot{\alpha}_{ci} = - \dot{\rho}_{ij}
+\end{equation}
+
+
+The rate of change of the distance using can be estimated using only position and heading of velocity measurements. For that, we project the velocity of both the agent $i$ and the preceding agent $j$ on the relative position vector
+\begin{gather}
+  \dot{\rho}_{ij} = \frac{1}{\rho_{ij}} (\vec{v_j} \vec{r_{ij}} - \vec{v_i} \vec{r_{ij}}) = v (\cos(\kappa_{ij}) - \cos(\theta_{ji}))
+\end{gather}
+
+The circularization shape control law looks like
+\begin{equation}
+  \dot{\alpha}_{ci} = -\dot{\rho}_{ij} =  v (\cos(\kappa_{ij}) + \cos(\theta_{ji}))
+\end{equation}
+
+
+
+\subsection{Assembly of the adaptive control law}
+In the formulation of the adaptive shape control law the applied adaption rate was defined. After defining the terms of the adaptive control law and the switch we recall the previous formulation introducing the switching gain term defined (\ref{switch}) and with the term defined in (\ref{circle})
+\begin{equation}
+\label{shapeControlLaw}
+\dot{\alpha}_i = \nu_i \mu_c \dot{\alpha}_{ci}
+\end{equation}
+
+Values for $\nu_i(\epsilon)$ and $\mu_c$ should be chosen so that Assumption 1 is guaranteed. Typically, a big $\epsilon$ and a small $\mu_c$ will offer a more robust controlled converge but slower.
+
+\textbf{Theorem 1}. Given a switching strategy and $\mu_c>0, \mu_s, \mu_r$ gains that guarantee that Assumption 1 is satisfied, the circularization control law in (\ref{shapeControlLaw}) makes the circular formation manifold globally asymptotically stable. Any initial state ($[\vec{x}, \vec{y}, \vec{\psi}, \vec{\alpha}]$) of the network converges to a circle without any coordination between agents.
+
+A proof for Theorem 1 can be found in the Annex A
+
+\section{Complementary results}
+In this section we propose two extra control laws for controling the radius of the formation and 
+
+\subsection{Equally spaced formation}
+The procedure described in the previous section achieves a circular formation but there is no constraint on the spacing between any agents. Since each agent only uses the distance with respect to the preceding agent there is no way to obtain equally spaced formations. This can be solved by incorporating information about the pursuing agent $h = \textrm{mod}(i-1,n)$. The intuition is that the distance to both the preceding and pursuing agent should be the same. In order to increase the distance with respect to the preceding agent the $\alpha_i$ must increase, so the preceding agent is seen with a greater angle within the circle. 
+
+Finally, it is non-dimensionalized with respect to some distance $\rho^*$, typically the desired radius $\rho^*=r^*$, to prevent different behavior for different radii of the circle.
+\begin{equation}
+\label{spacing}
+\dot{\alpha}_{si}= \mu_2 \frac{\rho_{ih} - \rho_{ij}}{\rho^*}
+\end{equation}
+
+Adding this term to the previous term, we can achieve an equally spaced formation.
+
+\subsection{Formation radius control}
+The concept of formation radius only makes sense if a circular formation is achieved. If the formation achieved is a spiral there will be no radius. The formation shape control law to achieve a circle was described in the previous section, here we will assume that a circular formations has already been achieved to derive how to modify the radius of a circular formation.
+
+In order to control the radius of the formation it is necessary first to have an estimate of the actual radius. Since we assume that a circular formation is achieved the dynamics of the particle $i$ satisfy
+\begin{equation}
+r_i \dot{\psi}_i = v
+\end{equation}
+
+Since $v$ is constant and known, an estimate $\hat{r_i}$ for $r_i$ is
+\begin{equation}
+\hat{r}_i = \frac{v}{\dot{\psi}_i}  = \frac{v}{u_i}
+\end{equation}
+
+Intuitively, if the reference radius $r^*$ is bigger than the estimated radius we will want to increase the radius, in a circular motion this can be achieved by decreasing the angular rate $\dot{\psi}_i$. 
+\begin{equation}
+\hat{r_i} - r^* = - \left( \frac{v}{u_i} - r^* \right)
+\end{equation}
+
+However, this approach would interfere with the adaptive circular motion control law so that it modifies the $\alpha$ due to the radial velocity. To avoid that, we will also use this term as a driver for $\dot{\alpha}$ decreasing $\alpha$ when we want to increase the radius of the formation. Under no damping, this would lead to oscillations around the desired radius $r^*$ since this behavior is described by a second order system. However, we know that our previously designed $\dot{\alpha}_{ci}$ acts precisely as a term damping the change in the radius, as long as both terms are active the radius control will be stable.
+
+This control law is not well defined, since the control variable is in the denominator. A better conditioned alternative is to use the angular rate reference $\psi^*$ that is determined by the desired radius and velocity 
+\begin{equation}
+\psi_i - \psi^* = u_i - \frac{v}{r^*}
+\end{equation}
+
+Once again, this control law is derived assuming the formation has been achieved. This means that it will be useful to use the same switch as in the case of the circularization law. Even though this control law is easier to understand if the formation is circling, it may be useful to enable it even if the formations is still spiraling. E.g. is the radius is too big and the formation is collapsing it is useful to preserve this behavior until the desired radius is achieved. The final adaption rate for the radius is
+
+\subsection{Assembly of the adaptive control law}
+In the formulation of the adaptive shape control law the applied adaption rate was defined. After defining the terms of the adaptive control law and the switch we recall the previous formulation introducing the switching gain term defined (\ref{switch}) and with the term defined in (\ref{circle}), (\ref{spacing}) and (\ref{radius})
+\begin{equation}
+\label{shapeControlLaw}
+\dot{\alpha}_i = \nu_i (\mu_c \dot{\alpha}_{ci} + \mu_s \dot{\alpha}_{si} + \mu_r \dot{\alpha}_{ri})
+\end{equation}
+
+\begin{equation}
+\label{radius}
+\dot{\alpha}_{ri} =  u_i - \frac{v}{r^*}
+\end{equation}
+
+The three components can be tuned for independently by choosing different values for their respective gain $\mu$. They can also be disabled if the action of any of them is not required by setting the respective gain to 0. The only gain that should always be active is the circularization gain $\mu_c$ since it achieves the circle for the equal spacing term or provides damping for the radius control action. 
+
+Other than that, it should be noted that the effect of equal spacing $\mu_s$ is much stronger than any other because the changes needed in the $\vec{\alpha}$ are greater, and dynamics are slower since separation have to propagate across the network. This means that $\mu_s$ should be chosen smaller since the deviations from the manifold will be greater. If propertly chosen gains $\mu_c, \mu_s, \mu_r$ and the switching strategy $\nu_{i}$ will satisfy Assumption 1
+
+\textbf{Observation 1}. Given a switching strategy and $\mu_c>0, \mu_s, \mu_r>0$ gains that guarantee that Assumption 1 is satisfied, the control law in (\ref{shapeControlLaw}) make the circular formation manifold with radius $r^*$ display a globally asymptotically stable behavior. The formation converges to a circle of radius $r^*$.
+
+\textbf{Observation 2}. Given a switching strategy and $\mu_c>0, \mu_s>0, \mu_r$ gains that guarantee that Assumption 1 is satisfied, the control laws in (\ref{shapeControlLaw}) make the balanced circular formation asymptotically stable. The formation converges to a circle with equal spacing between the agents.
+
+Since the circular formation is globally asymptotically stable for any formation without any need for coordination, this means that the formation will be responsive to changes in the network. The only condition for the new network to converge is for the new network to maintain the ring di-graph topology. As long as this condition is satisfied for any change, the network will again converge to a circle. This makes the algorithm robust to changes in the network.

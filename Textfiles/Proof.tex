@@ -1,0 +1,65 @@
+We will use Lyapunov theory to prove the convergence of the formation. We will do that by showing that the achieved solution is an invariant and attractive set. This approach is different from those shown in other previous works since we use rely on an invariant set to which all cyclic pursuit formations converge to, this way we can prove global stability.
+
+We start by describing the Cylic Pursuit manifold dynamics and then move on to proving the adaptive shape control law in (\ref{adaptiveLaw}) if the switching strategy is assumed to work perfectly. Only partials proofs for the circularization law are given.
+
+\subsection{Assumptions and previous considerations}
+Assumption 1 is critical since it states that the adaptive control laws are only effective in the cyclic pursuit manifold. 
+\textbf{Assumption 2}. We will also consider that the gains are small enough so that the formation never leaves the cyclic pursuit formation manifold.
+
+This assumption is somehow reciprocal to Assumption 1 in terms of convergence, but is better suited to out purpose here.
+
+The closed loop dynamics under cyclic pursuit can be expressed in terms of the relative parameters $\kappa, \theta, \rho$ in a more compact way than absolute coordinates and introducing the agent $k$ as $k=\textrm{mod}(j+1,n)$ as shown in \cite{galloway2013symmetry}. 
+
+\begin{align*}
+  \dot{\kappa}_{ij} =& -v \mu \sin (\kappa_{ij} - \alpha_i) \\
+  \dot{\theta}_{ji} =& -v \mu  \sin (\kappa_{ij} - \alpha_i)
+  - \frac{v}{\rho_{jk}} (\sin \kappa_{jk} + \sin \theta_{kj}) \\
+  &+ \frac{v}{\rho_{ij}} (\sin \kappa_{ij} + \sin \theta_{ji}) \\
+  \dot{\rho}_{ij} =& -v (\cos \kappa_{ij} + \cos \theta_{ji})
+\end{align*}
+
+The equilibrium is given by an invariant set that satisfies $\kappa_{ij} = \alpha_i$. Furthermore, this set is shown  in \cite{galloway2013symmetry} to be attractive and Globally Asymptotically Stable (GAS). Also, if all $\alpha_i>0$ then it is guaranteed that $\dot{\theta}_{ji} \to 0$ also. Therefore the dynamics in the invariant manifold satisfy
+\begin{align*}
+  0 &= - \frac{v}{\rho_{jk}} (\sin \alpha_j + \sin \theta_{kj})
+  + \frac{v}{\rho_{ij}} (\sin \alpha_i + \sin \theta_{ji}) \\
+  \dot{\rho}_{ij} &= -v (\cos \alpha_i + \cos \theta_{ji})
+\end{align*}
+
+\subsection{Convergence to the circle}
+Now we prove that the adaptive control law devised for circularizing the formation is stable when all other terms are 0, i.e. $\mu_r=\mu_s=0$. Then the formation converges to a circle.
+
+While strictly satisfying Assumption 2 is impossible, if the shape control law is slow enough the approximation may be feasible. In that case, the invariant manifold behaves as
+\begin{equation*}
+  \dot{\alpha_i} = -\mu_1 \dot{\rho}_{ij} = v \mu_1 (\cos \alpha_i + \cos \theta_{ji})
+\end{equation*}
+
+The following Lyapunov function \cite{khalil1996nonlinear} is chosen
+\begin{equation*}
+  V = \sum_{i=1}^{n} V_i = \sum_{i=1}^{n} \frac{1}{2} \dot{\alpha_i}^2
+\end{equation*}
+
+This function is positive definite with a minimum $\dot{\alpha_i}=0$, this implies at the same time that $\dot{\rho}_{ij}=0$ or $\rho_{ij}$ constant. If we prove that $\dot{\alpha_i}$ is GAS since $V$ is radially unbounded then all the other hold by LaSalle's theorem. Operating on $V_i$ we get 
+\begin{equation*}
+  V_i = \frac{1}{2} \dot{\alpha_i}^2 = \frac{1}{2} v^2 \mu_1^2 (\cos \alpha_i + \cos \theta_{ji})^2
+\end{equation*}
+
+And now we compute $\dot{V}$
+\begin{equation*}
+  \dot{V}_i = \dot{\alpha_i} \ddot{\alpha_i}
+\end{equation*}
+
+So we have to find an expression for $\ddot{\alpha_i}$. Taking the time derivative on the expression we already have we get and realizing that 
+\begin{gather*}
+  \frac{d}{dt} \dot{\alpha_i} = v \mu_1  \frac{d}{dt} (\cos \alpha_i + \cos \theta_{ji}) = - v \mu_1 \sin \alpha_i \dot{\alpha_i} = \\
+  - v^2 \mu_1^2   \sin \alpha_i (\cos \alpha_i + \cos \theta_{ji})
+\end{gather*}
+
+Here, we have assumed that the time derivative  $\dot{\theta}_{ij}$ is negligible since we are still arbitrarily close to the cyclic pursuit equilibrium manifold. Substituting
+\begin{gather*}
+\dot{V}_i = - v^3 \mu_1^3 \sin \alpha_i (\cos \alpha_i + \cos \theta_{ji})^2  v^2 \mu_1^2    (\cos \alpha_i + \cos \theta_{ji}) =\\
+- v \mu_1 \sin \alpha_i V_i
+\end{gather*}
+
+Therefore the adaptive control law is Globally Exponentially Stable (GES) with rate of convergence $v \mu_1 \min (\sin \alpha_i)$, since we only use $\alpha_i \in [0,\pi]$. GES implies that the system is robust and then it will still converge if the system does not behave exactly as the equations of motion state. We stated beforehand that our adaptive shape control law would not completely satisfy Assumption 2. However, since the system is GES, the system will still be stable for small deviations.
+
+
